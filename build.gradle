@@ -3,7 +3,7 @@
  */
 plugins {
     id 'java'
-    id 'maven'
+//    id 'maven'
     id 'maven-publish'
     id 'idea'
     id 'com.github.johnrengelman.shadow' version '5.1.0'
@@ -12,7 +12,8 @@ plugins {
 apply from: 'custom.gradle'
 
 jar {
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 repositories {
     mavenLocal()
@@ -20,26 +21,33 @@ repositories {
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
     maven {
-        url = 'http://nexus.hc.to/content/repositories/pub_releases/'
+        url = 'https://nexus.hc.to/content/repositories/pub_releases/'
     }
     maven {
-        url = 'http://repo.extendedclip.com/content/repositories/placeholderapi/'
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
     maven {
-        url = 'http://repo.mvdw-software.be/content/groups/public/'
+        url = 'https://repo.mvdw-software.be/content/groups/public/'
     }
     maven {
         url = 'https://ci.filoghost.me/plugin/repository/everything/'
     }
     maven {
-        url = 'http://maven.sk89q.com/repo/'
+        url = 'https://maven.sk89q.com/repo/'
     }
     maven {
         url = 'https://repo.maven.apache.org/maven2'
     }
     maven {
-        url = 'http://maven.sk89q.com/repo/'
+        url = 'https://maven.sk89q.com/repo/'
     }
+    maven {
+        name = 'minecraft-repo'
+        url = 'https://libraries.minecraft.net/'
+        // this lets gradle know where to look for authlib
+    }
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/central' }
 
     repositories {
         flatDir {
@@ -50,16 +58,23 @@ repositories {
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
-    compileOnly 'org.spigotmc:spigot:1.16.1-R0.1-SNAPSHOT'
-    compileOnly 'me.dablakbandit:core:0.4.3'
+//    compileOnly 'org.spigotmc:spigot:1.16.1-R0.1-SNAPSHOT'
+//    compileOnly 'me.dablakbandit:core:0.4.3'
+    implementation files('libs/core-0.4.3.jar')
     compileOnly 'me.clip:placeholderapi:2.9.2'
-    compileOnly 'be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT'
-    compile 'me.dablakbandit:core-plugin-downloader:0.0.1'
+//    compileOnly 'be.maximvdw:MVdWPlaceholderAPI:2.5.1-SNAPSHOT'
+    implementation files('libs/MVdWPlaceholderAPI-2.5.1.jar')
+//    compileOnly 'me.dablakbandit:core-plugin-downloader:0.0.1'
 
     // Download libs into the libs folder
-    compileOnly 'me.arcaniax.hdb.Main:HeadDatabaseAPI:API-0.3'
-    compileOnly 'net.citizensnpcs.Citizens:Citizens:2.0.22-SNAPSHOT'
-    compileOnly 'ch.njol:skript:2.1.2'
+//    compileOnly 'me.arcaniax.hdb.Main:HeadDatabaseAPI:API-0.3'
+    implementation files('libs/HeadDatabase-4.13.2.jar')
+//    compileOnly 'net.citizensnpcs.Citizens:Citizens:2.0.22-SNAPSHOT'
+    implementation files('libs/Citizens-2.0.28-b2359.jar')
+//    compileOnly 'ch.njol:skript:2.1.2'
+    implementation files('libs/Skript-2.3-alpha1.jar')
+    implementation 'net.milkbowl.vault:VaultAPI:1.6'
+    compileOnly 'com.mojang:authlib:1.5.21'
 }
 
 group = 'me.dablakbandit'
@@ -70,6 +85,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.WARN
     with copySpec {
         from 'src/main/resources'
         filter ReplaceTokens, tokens: [
